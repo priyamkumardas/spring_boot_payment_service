@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>Razorpay Payment Checkout</title>
+</head>
+<body>
+<h1>payment page</h1>
+<button id="rzp-button1">Pay</button>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script th:inline="javascript">
+
+  /*<![CDATA[*/
+  const receipt = /*[[${customerOrderReceipt}]]*/ "Test";
+  const order_id = /*[[${paymentOrderEntity.getRazorpayOrderId()}]]*/ "Test";
+  const amount = /*[[${paymentOrderEntity.getAmount()}]]*/ 100
+  const currency = /*[[${paymentOrderEntity.getCurrency()}]]*/ "INR"
+  /*]]>*/
+
+
+  var options = {
+"key": "rzp_live_V2pyoZIaso7wD2", // Enter the Key ID generated from the Dashboard
+"amount": 800, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "Acme Corp",
+    "description": "R_001",
+    "image": "https://example.com/your_logo",
+    "order_id": "order_KltfqHq4kt1LFp", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "handler": function (response){
+
+      const amount = {
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature
+      };
+
+      alert(response.razorpay_payment_id+"  "+response.razorpay_order_id+" "+response.razorpay_signature)
+
+      // $.ajax(
+      //     {
+      //         url:'http://localhost:8083/api/payment-service/payments/',
+      //         data:JSON.stringify(amount),
+      //         contentType: 'application/json',
+      //         type:'POST',
+      //         dataType:'json',
+      //         success: function(response){
+      //             console.log(response);
+      //             alert("Post request to payment service was successfull")
+      //         },
+      //         error: function(error){
+      //             console.log(error);
+      //             alert("!!!!!!!! --- Post request to payment failed --- !!!!!!!!!!");
+      //         }
+      //     }
+      // )
+    },
+    "prefill": {
+      "name": "Gaurav Kumar",
+      "email": "gaurav.kumar@example.com",
+      "contact": "9999999999"
+    },
+    "notes": {
+      "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+      "color": "#3399cc"
+    }
+  };
+  var rzp1 = new Razorpay(options);
+  rzp1.on('payment.failed', function (response){
+    alert(response.error.code);
+    alert(response.error.description);
+    alert(response.error.source);
+    alert(response.error.step);
+    alert(response.error.reason);
+    alert(response.error.metadata.order_id);
+    alert(response.error.metadata.payment_id);
+  });
+  document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+  }
+</script>
+
+</body>
+</html>
